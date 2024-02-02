@@ -10,6 +10,7 @@ PODS:
     - React-Core (= 0.73.3)
     - React-jsi (= 0.73.3)
     - ReactCommon/turbomodule/core (= 0.73.3)
+  - ffmpeg-kit-ios-min (6.0)
   - Flipper (0.201.0):
     - Flipper-Folly (~> 2.6)
   - Flipper-Boost-iOSX (1.76.0.1.11)
@@ -944,6 +945,24 @@ PODS:
   - React-Mapbuffer (0.73.3):
     - glog
     - React-debug
+  - react-native-slider (4.5.0):
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
+    - React-Core
+  - react-native-video (5.2.1):
+    - React-Core
+    - react-native-video/Video (= 5.2.1)
+  - react-native-video-trim (1.0.13):
+    - ffmpeg-kit-ios-min (~> 6.0)
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
+    - React-Core
+  - react-native-video/Video (5.2.1):
+    - React-Core
+  - react-native-webview (13.7.0):
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
+    - React-Core
   - React-nativeconfig (0.73.3)
   - React-NativeModulesApple (0.73.3):
     - glog
@@ -1167,6 +1186,10 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector-modern`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
+  - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
+  - react-native-video (from `../node_modules/react-native-video`)
+  - react-native-video-trim (from `../node_modules/react-native-video-trim`)
+  - react-native-webview (from `../node_modules/react-native-webview`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -1192,6 +1215,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - CocoaAsyncSocket
+    - ffmpeg-kit-ios-min
     - Flipper
     - Flipper-Boost-iOSX
     - Flipper-DoubleConversion
@@ -1261,6 +1285,14 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   React-Mapbuffer:
     :path: "../node_modules/react-native/ReactCommon"
+  react-native-slider:
+    :path: "../node_modules/@react-native-community/slider"
+  react-native-video:
+    :path: "../node_modules/react-native-video"
+  react-native-video-trim:
+    :path: "../node_modules/react-native-video-trim"
+  react-native-webview:
+    :path: "../node_modules/react-native-webview"
   React-nativeconfig:
     :path: "../node_modules/react-native/ReactCommon"
   React-NativeModulesApple:
@@ -1310,6 +1342,7 @@ SPEC CHECKSUMS:
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
   FBLazyVector: 70590b4f9e8ae9b0ce076efacea3abd7bc585ace
   FBReactNativeSpec: e47ea8c8f044c25e41a4fa5e8b7ff3923d3e0a94
+  ffmpeg-kit-ios-min: 4e9a088f4ee9629435960b9d68e54848975f1931
   Flipper: c7a0093234c4bdd456e363f2f19b2e4b27652d44
   Flipper-Boost-iOSX: fd1e2b8cbef7e662a122412d7ac5f5bea715403c
   Flipper-DoubleConversion: 2dc99b02f658daf147069aad9dbd29d8feb06d30
@@ -1344,6 +1377,10 @@ SPEC CHECKSUMS:
   React-jsinspector: 6fad0fe14882fb6b1c32e5cc8a4bd3d33a8b6790
   React-logger: cb0dd15ac67b00e7b771ef15203edcb29d4a3f8e
   React-Mapbuffer: d59258be3b0d2280c6ba8964ab6e36ec69211871
+  react-native-slider: 7d387c7e8dd0b4c12bf49c975c8666435f082a33
+  react-native-video: c26780b224543c62d5e1b2a7244a5cd1b50e8253
+  react-native-video-trim: 448439816bf060dfdb6773b2ec654bfb40affa12
+  react-native-webview: f109b7da3efc6ea7a6d61a3cff3907edb6237b6a
   React-nativeconfig: 4d3076dc3dc498ec49819e4e4225b55d3507f902
   React-NativeModulesApple: 46f14baf36010b22ffd84fd89d5586e4148edfb3
   React-perflogger: 27ccacf853ba725524ef2b4e444f14e34d0837b0
