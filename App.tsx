@@ -1,52 +1,88 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, Button} from 'react-native';
+import React, {useRef, useState, useEffect} from 'react';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import WebView from 'react-native-webview';
+import Video, {OnLoadData} from 'react-native-video';
 
 const App = () => {
-  const videoDuration = 1500; // Mock video duration in seconds
-  const [startValue, setStartValue] = useState(60); // State for start trim value (in seconds)
-  const [endValue, setEndValue] = useState(videoDuration); // State for end trim value (in seconds)
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [startValue, setStartValue] = useState(0);
+  const [endValue, setEndValue] = useState(0);
+  const videoRef = useRef<Video>(null); // Add Video type to useRef
+  const [isDragging, setIsDragging] = useState(false); // State to track slider dragging
 
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes} min ${remainingSeconds} sec`;
+  useEffect(() => {
+    setEndValue(videoDuration);
+  }, [videoDuration]);
+
+  const handleVideoLoad = (meta: OnLoadData) => {
+    setVideoDuration(meta.duration);
   };
 
-  const handleValuesChange = (values: any) => {
+  const handleValuesChangeStart = () => {
+    setIsDragging(true); // Set dragging state to true when user starts dragging
+  };
+
+  const handleValuesChange = (values: number[]) => {
+    if (!isDragging) {
+      return;
+    } // Return early if not dragging
     setStartValue(values[0]);
     setEndValue(values[1]);
     console.log(values);
+    if (videoRef.current) {
+      videoRef.current.seek(values[0]); // Seek to the start value
+    }
+  };
+
+  const handleValuesChangeFinish = () => {
+    setIsDragging(false); // Set dragging state to false when user finishes dragging
+  };
+
+  const trimVideo = () => {
+    console.log('Trimming video...');
+  };
+
+  const playVideo = () => {
+    if (videoRef.current) {
+      videoRef.current.presentFullscreenPlayer();
+      videoRef.current.seek(startValue);
+      videoRef.current.dismissFullscreenPlayer(); // Dismiss to start playback
+    }
   };
 
   return (
     <View style={styles.container}>
+      <Video
+        source={require('./assets/test-video.mp4')}
+        style={styles.video}
+        controls={false}
+        paused={true}
+        ref={videoRef}
+        onLoad={meta => handleVideoLoad(meta)}
+      />
+
+      <TouchableOpacity onPress={playVideo}>
+        <View style={styles.triangle} />
+      </TouchableOpacity>
+
       <View style={styles.sliderContainer}>
-        <WebView
-          style={{width: 300, height: 200}}
-          javaScriptEnabled={true}
-          source={{uri: 'https://www.youtube.com/embed/ZbIzZD_YNsA'}}
-        />
-        <Text style={styles.timeStamp}>
-          Start time: {formatTime(startValue)}
-        </Text>
+        <Text>Start time: {parseFloat(startValue.toFixed(2))} sec</Text>
+        <Text>End time: {parseFloat(endValue.toFixed(2))} sec</Text>
         <MultiSlider
           values={[startValue, endValue]}
           sliderLength={300}
           min={0}
           max={videoDuration}
           step={0.01}
+          onValuesChangeStart={handleValuesChangeStart} // Start dragging event
           onValuesChange={handleValuesChange}
+          onValuesChangeFinish={handleValuesChangeFinish} // Finish dragging event
         />
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Next"
-          onPress={() => console.log('Next button pressed')}
-        />
-      </View>
+      <TouchableOpacity onPress={trimVideo} style={styles.trimButton}>
+        <Text style={styles.trimButtonText}>Next</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -54,30 +90,44 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
   },
+  video: {
+    width: 300,
+    height: 400,
+  },
+  triangle: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderBottomWidth: 14,
+    borderStyle: 'solid',
+    backgroundColor: 'transparent',
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: 'blue',
+    transform: [{rotate: '90deg'}],
+  },
   sliderContainer: {
     width: '100%',
-    marginBottom: 20,
-    display: 'flex',
-    justifyContent: 'center',
+    marginTop: 20,
     alignItems: 'center',
   },
-  timeStamp: {
-    alignSelf: 'stretch',
-    textAlign: 'center',
-    marginVertical: 5,
-  },
-  buttonContainer: {
+  trimButton: {
     backgroundColor: 'blue',
-    padding: 10,
+    padding: 15,
     borderRadius: 6,
     margin: 10,
     width: '90%',
     color: 'white',
+  },
+  trimButtonText: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 
