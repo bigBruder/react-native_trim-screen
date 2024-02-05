@@ -72,7 +72,7 @@ const App = () => {
           values={[startValue, endValue]}
           sliderLength={300}
           min={0}
-          max={videoDuration}
+          max={100}
           step={0.01}
           onValuesChangeStart={handleValuesChangeStart} // Start dragging event
           onValuesChange={handleValuesChange}
