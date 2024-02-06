@@ -1,104 +1,105 @@
-import React, {useRef, useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import React, {useState, useRef, useEffect} from 'react';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import Video, {OnLoadData} from 'react-native-video';
+import Video, {OnLoadData, OnProgressData} from 'react-native-video';
+import {View, Text, TouchableOpacity, ViewStyle, TextStyle} from 'react-native';
 
-const App = () => {
-  const [videoDuration, setVideoDuration] = useState(0);
-  const [startValue, setStartValue] = useState(0);
-  const [endValue, setEndValue] = useState(0);
-  const videoRef = useRef<Video>(null); // Add Video type to useRef
-  const [isDragging, setIsDragging] = useState(false); // State to track slider dragging
+interface Style {
+  container: ViewStyle;
+  video: ViewStyle;
+  playButton: ViewStyle;
+  playButtonText: TextStyle;
+  sliderContainer: ViewStyle;
+  trimButton: ViewStyle;
+  trimButtonText: TextStyle;
+}
+
+const App: React.FC = () => {
+  const videoRef = useRef<Video>(null);
+  const [videoDuration, setVideoDuration] = useState<number>(0);
+  const [trimStart, setTrimStart] = useState<number>(0);
+  const [trimEnd, setTrimEnd] = useState<number>(0);
+  const [isTrimming, setIsTrimming] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(true);
 
   useEffect(() => {
-    setEndValue(videoDuration);
+    setTrimEnd(videoDuration);
   }, [videoDuration]);
 
-  const handleVideoLoad = (meta: OnLoadData) => {
-    setVideoDuration(meta.duration);
-  };
+  const onVideoLoad = (data: OnLoadData) => setVideoDuration(data.duration);
 
-  const handleValuesChangeStart = () => {
-    setIsDragging(true); // Set dragging state to true when user starts dragging
-  };
+  const onStartTrimming = () => setIsTrimming(true);
 
-  const handleValuesChange = (values: number[]) => {
-    if (!isDragging) {
-      return;
-    } // Return early if not dragging
-    setStartValue(values[0]);
-    setEndValue(values[1]);
-    console.log(values);
-    if (videoRef.current) {
-      videoRef.current.seek(values[0]); // Seek to the start value
+  const onTrimValuesChange = (values: number[]) => {
+    const [start, end] = values;
+    if (isTrimming) {
+      setTrimStart(start);
+      setTrimEnd(end);
     }
   };
 
-  const handleValuesChangeFinish = () => {
-    setIsDragging(false); // Set dragging state to false when user finishes dragging
-  };
+  const onEndTrimming = () => setIsTrimming(false);
 
-  const trimVideo = () => {
-    console.log('Trimming video...');
-  };
-
-  const playVideo = () => {
+  const playTrimmedVideo = () => {
     if (videoRef.current) {
-      videoRef.current.presentFullscreenPlayer();
-      videoRef.current.seek(startValue);
-      videoRef.current.dismissFullscreenPlayer(); // Dismiss to start playback
+      videoRef.current.seek(trimStart);
+      setIsPaused(false);
     }
   };
+
+  const onVideoProgress = (data: OnProgressData) => {
+    if (data.currentTime >= trimEnd) {
+      setIsPaused(true);
+      videoRef.current?.seek(trimStart);
+    }
+  };
+
+  const trimVideo = () =>
+    console.log('Trimming video from:', trimStart, 'to', trimEnd);
 
   return (
     <View style={styles.container}>
       <Video
+        ref={videoRef}
         source={require('./assets/test-video.mp4')}
         style={styles.video}
-        controls={false}
-        paused={true}
-        ref={videoRef}
-        onLoad={meta => handleVideoLoad(meta)}
+        paused={isPaused}
+        onLoad={onVideoLoad}
+        onProgress={onVideoProgress}
+        repeat={false}
       />
-
-      <TouchableOpacity onPress={playVideo}>
-        <View style={styles.triangle} />
+      <TouchableOpacity onPress={playTrimmedVideo} style={styles.playButton}>
+        <Text style={styles.playButtonText}>Play</Text>
       </TouchableOpacity>
-
       <View style={styles.sliderContainer}>
-        <Text>Start time: {parseFloat(startValue.toFixed(2))} sec</Text>
-        <Text>End time: {parseFloat(endValue.toFixed(2))} sec</Text>
+        <Text>Start: {trimStart.toFixed(2)} sec</Text>
+        <Text>End: {trimEnd.toFixed(2)} sec</Text>
         <MultiSlider
-          values={[startValue, endValue]}
+          values={[trimStart, trimEnd]}
           sliderLength={300}
+          onValuesChangeStart={onStartTrimming}
+          onValuesChange={onTrimValuesChange}
+          onValuesChangeFinish={onEndTrimming}
           min={0}
-          max={100}
+          max={videoDuration > 0 ? videoDuration : 100}
           step={0.01}
-          onValuesChangeStart={handleValuesChangeStart} // Start dragging event
-          onValuesChange={handleValuesChange}
-          onValuesChangeFinish={handleValuesChangeFinish} // Finish dragging event
         />
       </View>
-
       <TouchableOpacity onPress={trimVideo} style={styles.trimButton}>
-        <Text style={styles.trimButtonText}>Next</Text>
+        <Text style={styles.trimButtonText}>Trim Video</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const styles: Style = {
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#fff',
   },
-  video: {
-    width: 300,
-    height: 400,
-  },
-  triangle: {
+  video: {width: 300, height: 400},
+  playButton: {
     width: 0,
     height: 0,
     borderLeftWidth: 8,
@@ -111,24 +112,16 @@ const styles = StyleSheet.create({
     borderBottomColor: 'blue',
     transform: [{rotate: '90deg'}],
   },
-  sliderContainer: {
-    width: '100%',
-    marginTop: 20,
-    alignItems: 'center',
-  },
+  playButtonText: {fontSize: 16, color: 'blue'},
+  sliderContainer: {width: '100%', alignItems: 'center', marginVertical: 20},
   trimButton: {
     backgroundColor: 'blue',
     padding: 15,
     borderRadius: 6,
     margin: 10,
     width: '90%',
-    color: 'white',
   },
-  trimButtonText: {
-    color: 'white',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-});
+  trimButtonText: {color: '#fff', textAlign: 'center', fontSize: 16},
+};
 
 export default App;
